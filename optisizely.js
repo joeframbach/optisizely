@@ -8,10 +8,10 @@ $(function () {
   }
 
   $.getScript('https://cdn.optimizely.com/js/' + optimizelyId + '.js', function () {
-    experiments = optimizely.data.experiments;
-    variations = optimizely.data.variations;
+    experiments = optimizely.allExperiments;
+    variations = optimizely.allVariations;
 
-    // Attach extra metadata onto optimizely.data.variations.
+    // Attach extra metadata onto optimizely.allVariations.
     // Calculate the approximate size of each variation.
     $.each(variations, function (variationId) {
       var variation = variations[variationId];
@@ -19,7 +19,7 @@ $(function () {
       variation.size = JSON.stringify(variation.code||'').length;
     });
 
-    // Attach extra metadata onto optimizely.data.experiments.
+    // Attach extra metadata onto optimizely.allExperiments.
     // Link each experiment to its variations.
     // Calculate the total size of each experiment.
     $.each(experiments, function (experimentKey, experiment) {
@@ -58,6 +58,15 @@ $(function () {
             '</strong>' +
            '</p>' +
            experiment.variations.map(variationHtml).join('');
+  }
+  function experimentUrlHtml (experiment) {
+    if (!experiment.urls) return '';
+    return '<p><strong>Url targeting</strong></p>' +
+      '<ul>' +
+      experiment.urls.map(function (url) {
+        return '<li>' + url.match + ': ' + url.value + '</li>'
+      }).join('') +
+      '</ul>';
   }
 
   // Build the treemap.
@@ -99,9 +108,13 @@ $(function () {
   $('body').on('click', '[data-variation-id]', function () {
     var variation = variations[$(this).data('variation-id')];
     var experiment = experiments[variation.experimentKey];
-    var source = variation.code;
+    var source = variation.code || '';
     codemirror.setValue(source);
-    $('.current-variation').html(experimentHtml(experiment) + '<hr>' + variationHtml(variation));
+    $('.current-variation').html(
+      experimentHtml(experiment) + '<hr>' +
+      experimentUrlHtml(experiment) + '<hr>' +
+      variationHtml(variation)
+    );
     $('#list-pane').css('transform', 'translateX(-100%)');
     $('#map-pane').css('transform', 'translateX(-100%)');
     $('#code').css('transform', 'translateX(0)');
