@@ -62,7 +62,10 @@ $(function () {
                bToKb(experiment.size) +
              '</a> ' +
              experiment.name +
-             ' (' + experiment.experimentKey + ')' +
+             ' (<a target="_blank" ' +
+               'href="https://app.optimizely.com/projects/' + optimizelyId + '/experiments/' + experiment.experimentKey + '?search=' + experiment.experimentKey + '">' +
+               experiment.experimentKey +
+             '</a>)' +
             '</strong>' +
            '</p>' +
            experiment.variations.map(variationHtml).join('');
