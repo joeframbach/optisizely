@@ -42,7 +42,6 @@ $(function () {
     return (b / 1024).toFixed(1) + 'KB';
   }
   function variationHtml (variation) {
-    console.log(variation.weight)
     var notRunning = !variation.weight;
     var running100 = (variation.weight === 10000);
     var className = (notRunning || running100) ? 'warning' : '';
