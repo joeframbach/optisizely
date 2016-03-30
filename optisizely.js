@@ -25,7 +25,7 @@ $(function () {
     $.each(experiments, function (experimentKey, experiment) {
       experiment.variations = experiment.variation_ids.map(function (variationId) {
         variations[variationId].experimentKey = experimentKey;
-        variations[variationId].weight = experiment.variation_weights[variationId];
+        variations[variationId].weight = (experiment.variation_weights||[])[variationId];
         return variations[variationId];
       });
       experiment.experimentKey = experimentKey;
@@ -91,7 +91,7 @@ $(function () {
       name: "<b>Optimizely experiments and variations " + bToKb(totalArea) + "</b>",
       data: { '$area': totalArea },
       children: $.map(experiments, function (experiment) {
-        var warning = experiment.variations.some(function (variation) {
+        var warning = (experiment.variations||[]).some(function (variation) {
           return !variation.weight || variation.weight === 10000;
         });
         return {
