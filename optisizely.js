@@ -25,6 +25,7 @@ $(function () {
     $.each(experiments, function (experimentKey, experiment) {
       experiment.variations = experiment.variation_ids.map(function (variationId) {
         variations[variationId].experimentKey = experimentKey;
+        variations[variationId].weight = experiment.variation_weights[variationId];
         return variations[variationId];
       });
       experiment.experimentKey = experimentKey;
@@ -41,18 +42,26 @@ $(function () {
     return (b / 1024).toFixed(1) + 'KB';
   }
   function variationHtml (variation) {
-    return '<p>' + 
+    console.log(variation.weight)
+    var notRunning = !variation.weight;
+    var running100 = (variation.weight === 10000);
+    var className = (notRunning || running100) ? 'warning' : '';
+    return '<p class="' + className + '">' + 
              '<a data-variation-id="' + variation.variationId + '">' +
              bToKb(variation.size) +
              '</a> ' +
               'Variation ' + variation.variationId +
+              (notRunning ? ' <strong>NOT RUNNING</strong>' : '') +
+              (running100 ? ' <strong>100% WEIGHT</strong>' : '') +
            '</p>';
   }
   function experimentHtml (experiment) {
     return '<p>' +
             '<strong>' +
-             (100*experiment.size/totalArea).toFixed(1) + '% ' +
-             bToKb(experiment.size) + ' ' +
+            '<a data-variation-id="' + experiment.variations[experiment.variations.length-1].variationId + '">' +
+               (100*experiment.size/totalArea).toFixed(1) + '% ' +
+               bToKb(experiment.size) +
+             '</a> ' +
              experiment.name +
              ' (' + experiment.experimentKey + ')' +
             '</strong>' +
@@ -82,9 +91,16 @@ $(function () {
       name: "<b>Optimizely experiments and variations " + bToKb(totalArea) + "</b>",
       data: { '$area': totalArea },
       children: $.map(experiments, function (experiment) {
+        var warning = experiment.variations.some(function (variation) {
+          return !variation.weight || variation.weight === 10000;
+        });
         return {
           name: experimentHtml(experiment),
-          data: { '$area': experiment.size, experiment: experiment }
+          data: {
+            '$area': experiment.size,
+            experiment: experiment,
+            '$symbol': warning ? 'warning' : ''
+          }
         }
       }).sort(sortFn)
     }
