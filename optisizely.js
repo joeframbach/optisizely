@@ -94,14 +94,19 @@ $(function () {
       data: { '$area': totalArea },
       children: $.map(experiments, function (experiment) {
         var warning = (experiment.variations||[]).some(function (variation) {
-          return !variation.weight || variation.weight === 10000;
+          return variation.weight === 10000;
+        }) || (experiment.variations||[]).every(function (variation) {
+          return !variation.weight;
+        });
+        var lightWarning = (experiment.variations||[]).some(function (variation) {
+          return !variation.weight;
         });
         return {
           name: experimentHtml(experiment),
           data: {
             '$area': experiment.size,
             experiment: experiment,
-            '$symbol': warning ? 'warning' : ''
+            '$symbol': warning ? 'warning' : lightWarning ? 'light-warning' : ''
           }
         }
       }).sort(sortFn)
